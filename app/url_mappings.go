@@ -1,8 +1,13 @@
 package app
 
-import "github.com/tony-landreth/bookstore_items-api/controllers"
+import (
+	"net/http"
+
+	"github.com/tony-landreth/bookstore_items-api/controllers"
+)
 
 func mapUrls() {
-	router.HandleFunc(path: "/items", controllers.ItemsController.Create).Methods(http.MethodPost)
+	router.HandleFunc("/ping", controllers.PingController.Ping).Methods(http.MethodGet)
+	router.HandleFunc("/items", controllers.ItemsController.Create).Methods(http.MethodPost)
 	controllers.UsersController.Create()
 }

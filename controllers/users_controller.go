@@ -10,6 +10,4 @@ var (
 	UsersController usersControllerInterface = &usersController{}
 )
 
-func Create() {
-
-}
+func (c *usersController) Create() {}

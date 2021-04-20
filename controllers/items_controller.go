@@ -1,14 +1,20 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/federicoleon/bookstore_oauth-go/oauth"
+	"github.com/federicoleon/bookstore_utils-go/rest_errors"
 	"github.com/tony-landreth/bookstore_items-api/domain/items"
+	"github.com/tony-landreth/bookstore_items-api/services"
+	"github.com/tony-landreth/bookstore_items-api/utils/http_utils"
 )
 
 var (
-	ItemsController itemsControllerInterface = &itemsController
+	ItemsController itemsControllerInterface = &itemsController{}
 )
 
 type itemsControllerInterface interface {
@@ -19,22 +25,44 @@ type itemsControllerInterface interface {
 type itemsController struct{}
 
 func (c *itemsController) Create(w http.ResponseWriter, r *http.Request) {
-	if err := oath.AuthenticateRequest(r); err != nil {
-		// TODO: Return error to user.
+	if err := oauth.AuthenticateRequest(r); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(err.Status())
+		if a := json.NewEncoder(w).Encode(err); a != nil {
+			fmt.Println("Error json: " + a.Error())
+		}
+		return
+	}
+	sellerId := oauth.GetCallerId(r)
+	if sellerId == 0 {
+		respErr := rest_errors.NewUnauthorizedError("invalid access token")
+		http_utils.RespondError(w, respErr)
 		return
 	}
 
-	item := items.Item{
-		Seller: oauth.GetCallerId(r),
-	}
-
-	result, err := services.ItemsService.Create(item)
+	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		//TODO: return error json to user.
+		respErr := rest_errors.NewBadRequestError("invalid request body")
+		http_utils.RespondError(w, respErr)
+		return
+	}
+	defer r.Body.Close()
+
+	var itemRequest items.Item
+	if err := json.Unmarshal(requestBody, &itemRequest); err != nil {
+		respErr := rest_errors.NewBadRequestError("invalid item json body")
+		http_utils.RespondError(w, respErr)
+		return
 	}
 
-	fmt.Println(result)
-	//TODO: Return created item as JSON with HTTP status 201 - Created.
+	itemRequest.Seller = sellerId
+
+	result, createErr := services.ItemsService.Create(itemRequest)
+	if createErr != nil {
+		http_utils.RespondError(w, createErr)
+		return
+	}
+	http_utils.RespondJson(w, http.StatusCreated, result)
 }
 
 func (c *itemsController) Get(w http.ResponseWriter, r *http.Request) {
