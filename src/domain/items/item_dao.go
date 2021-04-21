@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/federicoleon/bookstore_utils-go/rest_errors"
-	"github.com/tony-landreth/bookstore_items-api/clients/elasticsearch"
-	"github.com/tony-landreth/bookstore_items-api/domain/queries"
+	"github.com/tony-landreth/bookstore_items-api/src/clients/elasticsearch"
+	"github.com/tony-landreth/bookstore_items-api/src/domain/queries"
 )
 
 const (

@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"github.com/federicoleon/bookstore_utils-go/rest_errors"
-	"github.com/tony-landreth/bookstore_items-api/domain/items"
-	"github.com/tony-landreth/bookstore_items-api/domain/queries"
-	"github.com/tony-landreth/bookstore_items-api/services"
-	"github.com/tony-landreth/bookstore_items-api/utils/http_utils"
+	"github.com/tony-landreth/bookstore_items-api/src/domain/items"
+	"github.com/tony-landreth/bookstore_items-api/src/domain/queries"
+	"github.com/tony-landreth/bookstore_items-api/src/services"
+	"github.com/tony-landreth/bookstore_items-api/src/utils/http_utils"
 )
 
 var (
