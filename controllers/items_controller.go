@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/federicoleon/bookstore_oauth-go/oauth"
 	"github.com/federicoleon/bookstore_utils-go/rest_errors"
 	"github.com/tony-landreth/bookstore_items-api/domain/items"
 	"github.com/tony-landreth/bookstore_items-api/services"
@@ -25,21 +24,6 @@ type itemsControllerInterface interface {
 type itemsController struct{}
 
 func (c *itemsController) Create(w http.ResponseWriter, r *http.Request) {
-	if err := oauth.AuthenticateRequest(r); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(err.Status())
-		if a := json.NewEncoder(w).Encode(err); a != nil {
-			fmt.Println("Error json: " + a.Error())
-		}
-		return
-	}
-	sellerId := oauth.GetCallerId(r)
-	if sellerId == 0 {
-		respErr := rest_errors.NewUnauthorizedError("invalid access token")
-		http_utils.RespondError(w, respErr)
-		return
-	}
-
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		respErr := rest_errors.NewBadRequestError("invalid request body")
@@ -55,8 +39,7 @@ func (c *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	itemRequest.Seller = sellerId
-
+	fmt.Println(itemRequest)
 	result, createErr := services.ItemsService.Create(itemRequest)
 	if createErr != nil {
 		http_utils.RespondError(w, createErr)
